@@ -20,34 +20,36 @@
 # define TIME_SLEEP_ERR	"Invalid time to sleep."
 # define MUST_EST_ERR	"Invalid number of times each philosopher must eat"
 # define MALLOC_ERR		"error: Could not allocate memory."
+# define CREATE_MUTEX_ERR	"error: Could not create mutex."
 # define INIT_PHILO_ERR	"Initialized philos failed."
 # define INIT_MUTEX_ERR	"Initialized mutex failed."
 
 
 typedef struct s_table
 {
-	time_t	start_time;
-	size_t	philo_amount;
-	size_t	time_to_die;
-	size_t	time_to_eat;
-	size_t	time_to_sleep;
-	int		each_eat_times;
-	pthread_t	grim_reaper;
-	bool	sim_stop;
+	time_t			start_time;
+	size_t			nb_philo;
+	size_t			time_to_die;
+	size_t			time_to_eat;
+	size_t			time_to_sleep;
+	int				each_eat_times;
+	pthread_t		grim_reaper;
+	bool			sim_stop;
 	pthred_mutex_t	sim_stop_lock;
-	pthred_mutex_t	wrtie_lock;
-	pthred_mutex_t	*fork_lock;
+	pthred_mutex_t	write_lock;
+	pthred_mutex_t	*fork_locks;
 	t_philo			**philos;
 }	t_table;
 
 typedef struct s_philo
 {
-	pthread_t	thread;
-	size_t		id;
-	size_t		meals_eaten;
-	time_t		last_meal;
-	size_t		fork[2];
-	t_table		*table;
+	pthread_t		thread;
+	size_t			id;
+	size_t			meals_eaten;
+	time_t			last_meal;
+	pthread_mutex_t	meal_time_lock;
+	size_t			fork[2];
+	t_table			*table;
 }	t_philo;
 
 
