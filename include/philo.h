@@ -10,6 +10,10 @@
 
 # define PHILO_MAX	(300) // why 300????
 
+# ifndef DEBUG_FORMAT
+# define DEBUG_FORMAT	(0)
+# endif
+
 // Error_messages define
 # define TOO_LESS		"Too less argments. Shoud pass at least 5 arguments"
 # define TOO_MANY		"Too many arguments. Can pass 6 arguments at most."
@@ -21,6 +25,7 @@
 # define MUST_EST_ERR	"Invalid number of times each philosopher must eat"
 # define MALLOC_ERR		"error: Could not allocate memory."
 # define CREATE_MUTEX_ERR	"error: Could not create mutex."
+# define CREATE_THREAD_ERR	"error: Could not create thread."
 # define INIT_PHILO_ERR	"Initialized philos failed."
 # define INIT_MUTEX_ERR	"Initialized mutex failed."
 
