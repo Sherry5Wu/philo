@@ -8,8 +8,6 @@
 # include <stdbool.h>
 # include <sys/time.h>
 
-# define PHILO_MAX	(300) // why 300????
-
 # ifndef DEBUG_FORMAT
 # define DEBUG_FORMAT	(0)
 # endif
@@ -28,21 +26,22 @@
 # define CREATE_THREAD_ERR	"error: Could not create thread."
 # define INIT_PHILO_ERR	"Initialized philos failed."
 # define INIT_MUTEX_ERR	"Initialized mutex failed."
+# define GET_TIME_ERR	"error: gettimeofday failed."
 
 
 typedef struct s_table
 {
 	time_t			start_time;
-	size_t			nb_philo;
+	size_t			philo_nb;
 	size_t			time_to_die;
 	size_t			time_to_eat;
 	size_t			time_to_sleep;
 	int				each_eat_times;
-	pthread_t		grim_reaper;
-	bool			sim_stop;
-	pthred_mutex_t	sim_stop_lock;
-	pthred_mutex_t	write_lock;
-	pthred_mutex_t	*fork_locks;
+	pthread_t		monitor;
+	bool			simulation_stop;
+	pthread_mutex_t	sim_stop_lock;
+	pthread_mutex_t	write_lock;
+	pthread_mutex_t	*fork_locks;
 	t_philo			**philos;
 }	t_table;
 
@@ -51,13 +50,22 @@ typedef struct s_philo
 	pthread_t		thread;
 	size_t			id;
 	size_t			meals_eaten;
-	time_t			last_meal;
+	time_t			last_eat;
 	pthread_mutex_t	meal_time_lock;
 	size_t			fork[2];
 	t_table			*table;
 }	t_philo;
 
-
+typedef enum e_status
+{
+	THINKING = 0,
+	EATING = 1,
+	SLEEPING = 2,
+	DIED = 3,
+	GOT_LEFT_FORK = 4,
+	GOT_RIGHT_FORK = 5,
+	FULL = 6
+}	t_status;
 
 
 // parsing.c
@@ -72,6 +80,17 @@ int		ft_strlen(char *str);
 void	*error_null(char *str, t_table *table);
 void	*free_table(t_table *table);
 
-# endif
+// rountine.c
+void	*routine(void *data);
+
+// utils.c
+void	error_msg(char	*message);
+time_t	get_time_in_ms(void);
+void	print_status_msg(t_philo *philo, bool stop_sign, t_status status);
+
+// monitor.c
+bool	is_simulation_stopped(t_table *table);
+
+#endif
 
 //https://github.com/mcombeau/philosophers/blob/main/philo/includes/philo.h

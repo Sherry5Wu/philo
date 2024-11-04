@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parsing.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/04 10:27:31 by jingwu            #+#    #+#             */
+/*   Updated: 2024/11/04 10:27:31 by jingwu           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "philo.h"
 
@@ -7,7 +18,7 @@ static bool	contains_only_digits(char **args)
 	int	j;
 
 	i = 0;
-	while (arg[i])
+	while (args[i])
 	{
 		j = 0;
 		while (args[i][j])
@@ -23,8 +34,8 @@ static bool	contains_only_digits(char **args)
 
 static bool	check_range(char **args)
 {
-	if (ft_atoi(args[1]) <= 0 || ft_atoi(args[1] > PHILO_MAX))
-		return (putstr_fd(PHILO_NUM_ERR, 2))
+	if (ft_atoi(args[1]) <= 0)
+		return (putstr_fd(PHILO_NUM_ERR, 2));
 	if (ft_atoi(args[2]) <= 0)
 		return (putstr_fd(TIME_DIE_ERR, 2));
 	if (ft_atoi(args[3]) <= 0)
@@ -54,7 +65,7 @@ bool	validate_args(int arg_amount, char **args)
 	while (i < arg_amount)
 	{
 		if (!contains_only_digits(args[i]))
-			return (putstr_fd(NON_NUM_ARG, 2););
+			return (putstr_fd(NON_NUM_ARG, 2));
 		if (!check_range(args))
 			return (false);
 	}

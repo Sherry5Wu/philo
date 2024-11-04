@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/04 10:27:36 by jingwu            #+#    #+#             */
+/*   Updated: 2024/11/04 10:27:36 by jingwu           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "philo.h"
 
@@ -14,22 +25,22 @@ static bool	start_simulation(t_table *table)
 {
 	unsigned int	i;
 
-	table->start_time = get_time_in_ms() + (table->nb_philo * 2 * 10);//underway
+	table->start_time = get_time_in_ms() + (table->philo_nb * 10 * 2);
 	i = 0;
-	while (i < table->nb_philo)
+	while (i < table->philo_nb)
 	{
 		if (pthread_create(&table->philos[i]->thread, NULL,
-			&philosophers, table->philos[i]) != 0)//underway philosopher
+			&routine, table->philos[i]) != 0)//underway philosopher
 		{
 			error_null(CREATE_THREAD_ERR, table);
 			return (false);
 		}
 		i++;
 	}
-	if (table->nb_philo > 1)
+	if (table->philo_nb > 1)
 	{
-		if (pthread_create(&table->grim_reaper, NULL,
-			&grim_reaper, table) != 0)//underway grim_reaper
+		if (pthread_create(&table->monitor, NULL,
+			&mointor, table) != 0)//underway grim_reaper
 		{
 			error_null(CREATE_THREAD_ERR, table);
 			return (false);
@@ -43,13 +54,13 @@ static void	stop_simulation(t_table *table)
 	unsigned int	i;
 
 	i = 0;
-	while (i < table->nb_philo)
+	while (i < table->philo_nb)
 	{
 		pthread_join((table->philos[i])->thread, NULL);
 		i++;
 	}
-	if (table->nb_philo > 1)
-		pthread_join(table->grim_reaper, NULL);
+	if (table->philo_nb > 1)
+		pthread_join(table->monitor, NULL);
 	if (DEBUG_FORMAT == true && table->each_eat_times != -1)
 		write_outcome(table);//underway
 	destroy_mutex(table);//underway
@@ -64,7 +75,7 @@ int	main(int ac, char **av)
 	{
 		if(!validate_args(ac, av)) // Done
 			return (EXIT_FAILURE);
-		table = init_table(ac, av, 1)// Done
+		table = init_table(ac, av, 1);// Done
 		if (!table)
 			return (EXIT_FAILURE);
 		if (!start_simulation(table))//underway

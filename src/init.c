@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/04 10:27:21 by jingwu            #+#    #+#             */
+/*   Updated: 2024/11/04 10:27:21 by jingwu           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "philo.h"
 
@@ -8,13 +19,13 @@ static void	assign_forks(t_philo *philo)
 {
 	if (philo->id % 2)
 	{
-		philo->fork[0] = (philo->id + 1) % (philo->table->nb_philo);
+		philo->fork[0] = (philo->id + 1) % (philo->table->philo_nb);
 		philo->fork[1] = philo->id;
 	}
 	else
 	{
 		philo->fork[0] = philo->id;
-		philo->fork[1] = (philo->id + 1) % (philo->table->nb_philo);
+		philo->fork[1] = (philo->id + 1) % (philo->table->philo_nb);
 	}
 }
 
@@ -28,13 +39,13 @@ static t_philo	**init_philo(t_table *table)
 	t_philo			**philos;
 	unsigned int	i;
 
-	philos = (t_philo **)malloc(sizeof(t_philo *) * (table->nb_philo + 1));// should plus 1 here???
+	philos = (t_philo **)malloc(sizeof(t_philo *) * (table->philo_nb + 1));// should plus 1 here???
 	if (!philos)
 		return (error_null(MALLOC_ERR, 0));
 	i = 0;
-	while (i < table->nb_philo)
+	while (i < table->philo_nb)
 	{
-		philos[i] = malloc(sizeoft(t_philo));
+		philos[i] = malloc(sizeof(t_philo));
 		if (philos[i])
 			return (error_null(MALLOC_ERR, 0));
 		if (pthread_mutex_init(&philos[i]->meal_time_lock, 0) != 0)
@@ -83,14 +94,14 @@ static bool	init_global_mutexes(t_table *table)
 	Because of the norm rules, one funcion can't be more than 25 lines,
 	so passed int i here to reduce the lines.
 */
-t_table	*init_table(int ac, char **av, int i)
+t_table	*init_table(int ac, char **args, int i)
 {
 	t_table	*table;
 
 	table = malloc(sizeof(t_table));
 	if (!table)
 		return (error_null(MALLOC_ERR, 0));
-	table->philo_amount = (size_t)ft_atoi(args[1]);
+	table->philo_nb = (size_t)ft_atoi(args[1]);
 	table->time_to_die = (size_t)ft_atoi(args[2]);
 	table->time_to_eat = (size_t)ft_atoi(args[3]);
 	table->time_to_sleep = (size_t)ft_atoi(args[4]);
@@ -102,6 +113,6 @@ t_table	*init_table(int ac, char **av, int i)
 		return (error_null(INIT_PHILO_ERR, 0));
 	if (!init_global_mutexes(table))
 		return (error_null(INIT_MUTEX_ERR, 0));
-	table->sim_stop = false;
+	table->simulation_stop = false;
 	return (table);
 }
