@@ -1,21 +1,30 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/19 14:48:37 by jingwu            #+#    #+#             */
+/*   Updated: 2024/11/19 14:48:37 by jingwu           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
 
 # include <pthread.h>
+# include <unistd.h>
 # include <stdio.h>
 # include <stdlib.h>
 # include <stdbool.h>
 # include <sys/time.h>
 
-# ifndef DEBUG_FORMAT
-# define DEBUG_FORMAT	(0)
-# endif
-
-// Error_messages define
+/*-----------------------------Define Error Messages------------------------*/
 # define TOO_LESS		"Too less argments. Shoud pass at least 5 arguments"
 # define TOO_MANY		"Too many arguments. Can pass 6 arguments at most."
-# define NON_NUM_ARG	"Non-number characters. All the arguments should just contain numbers."
+# define NON_NUM_ARG	"Non-number characters.All the arguments should \
+						just contain numbers."
 # define PHILO_NUM_ERR	"Invalid philosopher number."
 # define TIME_DIE_ERR	"Invalid time to die."
 # define TIME_EAT_ERR	"Invalid time to eat."
@@ -27,7 +36,33 @@
 # define INIT_PHILO_ERR	"Initialized philos failed."
 # define INIT_MUTEX_ERR	"Initialized mutex failed."
 # define GET_TIME_ERR	"error: gettimeofday failed."
+# define FAIL_JOIN_THR	"error: Failed to join a thread."
 
+/*----------------------------------Structs--------------------------------*/
+typedef struct s_table	t_table;
+
+typedef enum e_status
+{
+	THINKING = 0,
+	EATING = 1,
+	SLEEPING = 2,
+	GOT_LEFT_FORK = 3,
+	GOT_RIGHT_FORK = 4,
+	DIED = 5,
+}	t_status;
+
+typedef struct s_philo
+{
+	pthread_t		thread;
+	size_t			id;
+	size_t			meals_eaten;
+	time_t			last_eat;
+	pthread_mutex_t	philo_lock;
+	pthread_mutex_t	*l_fork;
+	pthread_mutex_t	*r_fork;
+	t_table			*table;
+	t_status		status;
+}	t_philo;
 
 typedef struct s_table
 {
@@ -36,8 +71,7 @@ typedef struct s_table
 	size_t			time_to_die;
 	size_t			time_to_eat;
 	size_t			time_to_sleep;
-	int				each_eat_times;
-	pthread_t		monitor;
+	int				must_eat_times;
 	bool			simulation_stop;
 	pthread_mutex_t	sim_stop_lock;
 	pthread_mutex_t	write_lock;
@@ -45,52 +79,39 @@ typedef struct s_table
 	t_philo			**philos;
 }	t_table;
 
-typedef struct s_philo
-{
-	pthread_t		thread;
-	size_t			id;
-	size_t			meals_eaten;
-	time_t			last_eat;
-	pthread_mutex_t	meal_time_lock;
-	size_t			fork[2];
-	t_table			*table;
-}	t_philo;
-
-typedef enum e_status
-{
-	THINKING = 0,
-	EATING = 1,
-	SLEEPING = 2,
-	DIED = 3,
-	GOT_LEFT_FORK = 4,
-	GOT_RIGHT_FORK = 5,
-	FULL = 6
-}	t_status;
-
-
-// parsing.c
-bool	validate_args(int arg_amount, char **args);
+/*----------------------------------Functions-------------------------------*/
+// init.c
+bool	init_table(t_table *table, int ac, char **args);
 
 // libft.c
-bool	putstr_fd(char	*message, int fd);
-int		ft_atoi(const char *str);
 int		ft_strlen(char *str);
-
-// exit.c
-void	*error_null(char *str, t_table *table);
-void	*free_table(t_table *table);
-
-// rountine.c
-void	*routine(void *data);
-
-// utils.c
-void	error_msg(char	*message);
-time_t	get_time_in_ms(void);
-void	print_status_msg(t_philo *philo, bool stop_sign, t_status status);
+void	putstr_fd(char	*message, int fd);
+int		ft_atoi(const char *str);
 
 // monitor.c
-bool	is_simulation_stopped(t_table *table);
+bool	has_simulation_stopped(t_table *table);
+void	monitor(t_table *table);
+
+//routine_actions.c
+bool	philo_eating(t_philo *philo);
+bool	philo_sleeping(t_philo *philo);
+bool	philo_thinking(t_philo *philo);
+
+// routine.c
+void	*routine(void *data);
+bool	thread_sleep(t_philo *philo, time_t duration);
+void	set_philo_status(t_philo *philo, int status);
+void	put_down_forks(t_philo *philo);
+
+// stop_simulation.c
+void	clean_threads(t_table *table, size_t thread_nb);
+int		stop_simulation(t_table *table);
+
+// utils.c
+time_t	get_time_in_ms(void);
+void	ft_free(void *str);
+int		error_msg(char	*message);
+void	*error_msg_null(char *message);
+void	print_philo_status_msg(t_philo *philo, t_status status);
 
 #endif
-
-//https://github.com/mcombeau/philosophers/blob/main/philo/includes/philo.h

@@ -12,13 +12,6 @@
 
 #include "philo.h"
 
-void	error_msg(char	*message)
-{
-	if (!message)
-		return ;
-	printf("%s\n", message);
-}
-
 /*
 	@function
 	Get the current time in miliseconds.
@@ -57,34 +50,70 @@ time_t	get_time_in_ms(void)
 	else
 	{
 		error_msg(GET_TIME_ERR);
-		return (NULL);
+		return (-1);
 	}
+}
+
+void	ft_free(void *str)
+{
+	if (str)
+		free (str);
+	str = NULL;
+}
+
+/*
+	@what the function does?
+	Prints the passed error message to stand error mode.
+
+	@return
+	return false.
+
+	@usage
+	Use for error management for the whole program.
+*/
+int	error_msg(char	*message)
+{
+	if (message)
+		putstr_fd(message, 2);
+	return (EXIT_FAILURE);
+}
+
+/*
+	@function
+	Print out error message and return NULL.
+	Used when error generated during initialization part.
+
+	@return
+	return NULL.
+*/
+void	*error_msg_null(char *message)
+{
+	if (message)
+		error_msg(message);
+	return (NULL);
 }
 
 /*
 	@function
 	To output the each status message of a philosopher.
 */
-void	print_status_msg(t_philo *philo, bool stop_sign, t_status status)
+void	print_philo_status_msg(t_philo *philo, t_status status)
 {
 	time_t	time;
 
-	pthread_mutex_lock(&philo->table->write_lock);
-	if (is_simulation_stopped(philo->table) == true && stop_sign == false)
-	{
-		pthread_mutex_unlock(&philo->table->write_lock);
+	if (has_simulation_stopped(philo->table) == true)
 		return ;
-	}
+	pthread_mutex_lock(&philo->table->write_lock);
 	time = get_time_in_ms() - philo->table->start_time;
 	if (status == DIED)
-		printf("%ld %d %s\n", time, philo->id + 1, "died");
+		printf("%ld %zu %s\n", time, philo->id, "died");
 	else if (status == EATING)
-		printf("%ld %d %s\n", time, philo->id + 1, "is eating");
+		printf("%ld %zu %s\n", time, philo->id, "is eating");
 	else if (status == THINKING)
-		printf("%ld %d %s\n", time, philo->id + 1, "is thinking");
+		printf("%ld %zu %s\n", time, philo->id, "is thinking");
 	else if (status == SLEEPING)
-		printf("%ld %d %s\n", time, philo->id + 1, "is sleeping");
+		printf("%ld %zu %s\n", time, philo->id, "is sleeping");
 	else if (status == GOT_LEFT_FORK || status == GOT_RIGHT_FORK)
-		printf("%ld %d %s\n", time, philo->id + 1, "has taken a fork");
+		printf("%ld %zu %s\n", time, philo->id, "has taken a fork");
 	pthread_mutex_unlock(&philo->table->write_lock);
 }

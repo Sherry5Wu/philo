@@ -1,25 +1,40 @@
 NAME = philo
 CC := cc
-FLAG := -Wall -Wextra -Werror
-HEADER = ./include/philo.h
+CFLAG := -Wall -Wextra -Werror -g -pthread
+HEADER = ./include
 
+GREEN := \033[1;92m
+DEFAULT := \033[0;39m
 # SANITIZER = -fsanitize=thread
 
-SRC = init.c parsing.c philo.c utils.cc
-FULL_SRC = $(addprefix ./src/, $(SRC))
+SRCS_DIR = ./src
+SRC = init.c libft.c monitor.c philo.c routine_actions.c routine.c \
+		stop_simulation.c utils.c
+SRCS = $(addprefix $(SRCS_DIR)/, $(SRC))
+
+OBJS_DIR = ./obj
+OBJS = $(patsubst $(SRCS_DIR)/%.c, $(OBJS_DIR)/%.o, $(SRCS))
 
 all: $(NAME)
 
-$(NAME): $(FULL_SRC) $(HEADER)
-	@$(CC) $(FLAG)  $(FULL_SRC) -o $<
+$(NAME): $(OBJS_DIR) $(OBJS)
+	@$(CC) $(CFLAG) $(OBJS) -o $@
+	@echo "$(GREEN)Philo has been generated successfully!$(DEFAULT)"
+
+$(OBJS_DIR):
+	@mkdir -p $(OBJS_DIR)
+
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c
+	@$(CC) $(CFLAG) -I$(HEADER) -c $< -o $@
 
 clean:
-	@rm -f $(NAME)
+	@rm -rf $(OBJS_DIR)
+	@echo "$(GREEN)Objects have been cleaned.$(DEFAULT)"
 
 fclean: clean
 	@rm -f $(NAME)
+	@echo "$(GREEN)Philo has been cleaned.$(DEFAULT)"
 
 re: fclean all
-
 
 .PHONY: all clean fclean re

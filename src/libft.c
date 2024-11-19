@@ -25,14 +25,13 @@ int	ft_strlen(char *str)
 /*
 	It will always return false.
 */
-bool	putstr_fd(char	*message, int fd)
+void	putstr_fd(char	*message, int fd)
 {
-	if (!message)
+	if (message)
 	{
 		write(fd, message, ft_strlen(message));
 		write(fd, "\n", 1);
 	}
-	return (false);
 }
 
 int	ft_atoi(const char *str)
