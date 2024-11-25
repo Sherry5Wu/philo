@@ -21,10 +21,10 @@
 # include <sys/time.h>
 
 /*-----------------------------Define Error Messages------------------------*/
-# define TOO_LESS		"Too less argments. Shoud pass at least 5 arguments"
+# define TOO_LESS		"Too less argments. Should pass at least 5 arguments"
 # define TOO_MANY		"Too many arguments. Can pass 6 arguments at most."
 # define NON_NUM_ARG	"Non-number characters.All the arguments should \
-						just contain numbers."
+just contain numbers."
 # define PHILO_NUM_ERR	"Invalid philosopher number."
 # define TIME_DIE_ERR	"Invalid time to die."
 # define TIME_EAT_ERR	"Invalid time to eat."
@@ -80,7 +80,10 @@ typedef struct s_table
 }	t_table;
 
 /*----------------------------------Functions-------------------------------*/
-// init.c
+// init_philo.c
+t_philo	**init_philos(t_table *table);
+
+// init_table.c
 bool	init_table(t_table *table, int ac, char **args);
 
 // libft.c
@@ -93,24 +96,26 @@ bool	has_simulation_stopped(t_table *table);
 void	monitor(t_table *table);
 
 //routine_actions.c
-bool	philo_eating(t_philo *philo);
-bool	philo_sleeping(t_philo *philo);
+bool	philo_eating_sleeping(t_philo *philo);
+// bool	philo_sleeping(t_philo *philo);
 bool	philo_thinking(t_philo *philo);
 
 // routine.c
 void	*routine(void *data);
-bool	thread_sleep(t_philo *philo, time_t duration);
+bool	thread_sleep(t_philo *philo, size_t duration);
 void	set_philo_status(t_philo *philo, int status);
 void	put_down_forks(t_philo *philo);
 
 // stop_simulation.c
 void	clean_threads(t_table *table, size_t thread_nb);
+void	destroy_mutexes_of_table(t_table *table);
+void	free_table(t_table *table);
 int		stop_simulation(t_table *table);
 
 // utils.c
 time_t	get_time_in_ms(void);
 void	ft_free(void *str);
-int		error_msg(char	*message);
+bool	error_msg(char	*message);
 void	*error_msg_null(char *message);
 void	print_philo_status_msg(t_philo *philo, t_status status);
 

@@ -6,7 +6,7 @@
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/19 08:54:24 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/19 16:42:30 by jingwu           ###   ########.fr       */
+/*   Updated: 2024/11/25 09:54:58 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,10 @@
 */
 static bool	pick_up_forks(t_philo *philo)
 {
+	// static int i = 1;
+
 	pthread_mutex_lock(philo->l_fork);
+	// printf("<-----i=%d>\n", i++);
 	if (has_simulation_stopped(philo->table) == true)
 	{
 		pthread_mutex_unlock(philo->l_fork);
@@ -64,8 +67,9 @@ static bool	update_philo_status(t_philo *philo, t_status status)
 	return (true);
 }
 
-bool	philo_eating(t_philo *philo)
+bool	philo_eating_sleeping(t_philo *philo)
 {
+
 	if (pick_up_forks(philo) == false)
 		return (false);
 	if (update_philo_status(philo, EATING) == false)
@@ -76,13 +80,9 @@ bool	philo_eating(t_philo *philo)
 	pthread_mutex_lock(&philo->philo_lock);
 	philo->meals_eaten++;
 	pthread_mutex_unlock(&philo->philo_lock);
-	return (true);
-}
-
-bool	philo_sleeping(t_philo *philo)
-{
-	if (update_philo_status(philo, SLEEPING) == false)
-		return (false);
+	// if (update_philo_status(philo, SLEEPING) == false)
+	// 	return (false);
+	print_philo_status_msg(philo, SLEEPING);
 	if (thread_sleep(philo, philo->table->time_to_sleep) == false)
 		return (false);
 	return (true);
@@ -90,7 +90,8 @@ bool	philo_sleeping(t_philo *philo)
 
 bool	philo_thinking(t_philo *philo)
 {
-	if (update_philo_status(philo, THINKING) == false)
-		return (false);
+	// if (update_philo_status(philo, THINKING) == false)
+	// 	return (false);
+	print_philo_status_msg(philo, THINKING);
 	return (true);
 }

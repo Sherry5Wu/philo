@@ -12,19 +12,27 @@
 
 #include "philo.h"
 
-static bool	contains_only_digits(char **args)
+static bool	are_valid_numbers(char **args)
 {
 	int	i;
 	int	j;
 
-	i = 0;
+	i = 1;
 	while (args[i])
 	{
 		j = 0;
 		while (args[i][j])
 		{
 			if (args[i][j] < 48 || args[i][j] > 57)
-				return (false);
+			{
+				if(args[i][j] != '-' && args[i][j] != '+')
+					return (false);
+				else
+				{
+					if (args[i][j + 1] < 48 || args[i][j + 1] > 57)
+						return (false);
+				}
+			}
 			j++;
 		}
 		i++;
@@ -32,6 +40,11 @@ static bool	contains_only_digits(char **args)
 	return (true);
 }
 
+/*
+	@return
+	0: all the values are in the range;
+	1: there is at least one value is not in the correct range.
+*/
 static bool	check_range(char **args)
 {
 	if (ft_atoi(args[1]) <= 0)
@@ -56,18 +69,12 @@ static bool	check_range(char **args)
 		2.2  if there is the value of number_of_times_each_philosopher_must_eat,
 		     it should be great than 0.
 */
-static bool	validate_args(int arg_amount, char **args)
+static bool	validate_args(char **args)
 {
-	int	i;
-
-	i = 1;
-	while (i < arg_amount)
-	{
-		if (!contains_only_digits(args))
-			return (error_msg(NON_NUM_ARG));
-		if (!check_range(args))
-			return (false);
-	}
+	if (are_valid_numbers(args) == false)
+		return (error_msg(NON_NUM_ARG));
+	if (check_range(args) == false)
+		return (false);
 	return (true);
 }
 
@@ -76,20 +83,14 @@ static bool	validate_args(int arg_amount, char **args)
 	Launches the simulation by creating a grim reaper thread as well as
 	one thread for each philosopher.
 
-	Why start time = current time + (philo_nb * 10 * 2)?
-	To give a little bit extra time for the program to create thread for
-	every philosophers. Try to let every phiolsopher thread starts at
-	same time.
-
 	@return
 	0 if the simulation was successfully started;
 	1 if there was an error.
 */
-static int	start_simulation(t_table *table)
+static bool	start_simulation(t_table *table)
 {
 	size_t	i;
 
-	table->start_time = get_time_in_ms() + (table->philo_nb * 10 * 2);
 	i = 0;
 	while (i < table->philo_nb)
 	{
@@ -102,8 +103,19 @@ static int	start_simulation(t_table *table)
 		i++;
 	}
 	monitor(table);
-	return (0);
+	return (true);
 }
+
+// void print_table(t_table table)
+// {
+// 	printf("nb=%zu\n",table.philo_nb);
+// 	printf("time_die=%zu\n",table.time_to_die);
+// 	printf("time_eat=%zu\n",table.time_to_eat);
+// 	printf("time_sleep=%zu\n",table.time_to_sleep);
+// 	printf("must_eat=%d\n",table.must_eat_times);
+// 	printf("simulation_stop=%d\n",table.simulation_stop);
+// }
+
 
 int	main(int ac, char **av)
 {
@@ -111,14 +123,14 @@ int	main(int ac, char **av)
 
 	if (ac == 5 || ac == 6)
 	{
-		if(!validate_args(ac, av))
+		if(validate_args(av) == false)
 			return (EXIT_FAILURE);
-		// table = malloc(sizeof(t_table));
-		// if (!table)
-		// 	return(error_msg(MALLOC_ERR));
 		if (init_table(&table, ac, av) == false)
-			return(stop_simulation(&table));
-		if (start_simulation(&table) == 1)
+		{
+			free_table(&table);
+			return (EXIT_FAILURE);
+		}
+		if (start_simulation(&table) == false)
 			return(stop_simulation(&table));
 		stop_simulation(&table);
 		return (EXIT_SUCCESS);
@@ -129,3 +141,5 @@ int	main(int ac, char **av)
 		putstr_fd(TOO_MANY, 2);
 	return (EXIT_FAILURE);
 }
+// valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --tool=helgrind ./philo
+

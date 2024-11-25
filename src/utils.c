@@ -66,16 +66,16 @@ void	ft_free(void *str)
 	Prints the passed error message to stand error mode.
 
 	@return
-	return false.
+	return false (0).
 
 	@usage
 	Use for error management for the whole program.
 */
-int	error_msg(char	*message)
+bool	error_msg(char	*message)
 {
 	if (message)
 		putstr_fd(message, 2);
-	return (EXIT_FAILURE);
+	return (false);
 }
 
 /*

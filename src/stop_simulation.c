@@ -6,13 +6,13 @@
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 13:53:39 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/19 16:33:51 by jingwu           ###   ########.fr       */
+/*   Updated: 2024/11/25 08:38:40 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-static void	free_table(t_table *table)
+void	free_table(t_table *table)
 {
 	size_t	i;
 
@@ -44,6 +44,7 @@ void	clean_threads(t_table *table, size_t thread_nb)
 	size_t	i;
 
 	i = 0;
+	// printf("thread_nb=%zu\n", thread_nb);//for testing
 	while (i < thread_nb)
 	{
 		set_philo_status(table->philos[i], DIED);
@@ -51,6 +52,7 @@ void	clean_threads(t_table *table, size_t thread_nb)
 	}
 	while (i < thread_nb)
 	{
+		// printf("i=%zu\n", i);//for testing
 		if (pthread_join(table->philos[i]->thread, NULL) != 0)
 		{
 			pthread_mutex_lock(&table->write_lock);
@@ -60,8 +62,33 @@ void	clean_threads(t_table *table, size_t thread_nb)
 		i++;
 	}
 }
+/*
+	@function
+	Destroy all the mutexes which belong to the table.
+	Called when errors are generated in initializing philos.
+*/
+void	destroy_mutexes_of_table(t_table *table)
+{
+	size_t	i;
 
-static void	destroy_mutex(t_table *table)
+	i = 0;
+	if (!table)
+		return ;
+	while (i < table->philo_nb)
+	{
+		pthread_mutex_destroy(&table->fork_locks[i]);
+		i++;
+	}
+	pthread_mutex_destroy(&table->sim_stop_lock);
+	pthread_mutex_destroy(&table->write_lock);
+}
+/*
+	@function
+	Destroy all the mutexes of the whole process.
+	Called when the simulation already starts, then some error are generated;
+	or when the simulation stops.
+*/
+static void	destroy_all_mutexes(t_table *table)
 {
 	size_t	i;
 
@@ -86,8 +113,7 @@ static void	destroy_mutex(t_table *table)
 */
 int	stop_simulation(t_table *table)
 {
-	if (table->fork_locks)
-		destroy_mutex(table);
+	destroy_all_mutexes(table);
 	free_table(table);
 	return (EXIT_FAILURE);
 }

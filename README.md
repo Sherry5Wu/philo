@@ -6,34 +6,34 @@
 
 	1. pthread_create
 	Purpose: Creates a new thread and specifies the function that the thread will execute.
-	
+
 	Prototype:
 	int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void *), void *arg);
-	
+
 	thread: A pointer to a pthread_t variable that stores the thread ID.
-	
+
 	attr: Thread attributes, which can be NULL to use default attributes.
-	
+
 	start_routine: The function the thread will execute. This function must take a void* argument and return a void*.
-	
+
 	arg: The argument passed to start_routine. If not needed, it can be NULL.
-	
+
 	Return Value:
-	
+
 	Returns 0 on success.
- 
+
 	Returns an error code on failure.
- 
+
 	Example:
 
 		#include <pthread.h>
 		#include <stdio.h>
-		
+
 		void* print_message(void* arg) {
 		    printf("Hello from thread!\n");
 		    return NULL;
 		}
-		
+
 		int main() {
 		    pthread_t thread;
 		    pthread_create(&thread, NULL, print_message, NULL);
@@ -42,41 +42,41 @@
 		}
 
 	2. pthread_detach
-	Purpose: Sets the thread to a detached state. Detached threads automatically release their resources 
- 
+	Purpose: Sets the thread to a detached state. Detached threads automatically release their resources
+
  	when they terminate, and do not require pthread_join.
-	
+
 	Prototype:
 	int pthread_detach(pthread_t thread);
- 
+
 	thread: The thread ID of the thread to be detached.
- 
+
 	Return Value:
-	
+
 	Returns 0 on success.
- 
+
 	Returns an error code on failure.
- 
+
 	Note: After calling pthread_detach, you cannot use pthread_join on the thread.
-	
+
 	3. pthread_join
- 
+
 	Purpose: Waits for a thread to terminate and optionally retrieves the thread’s return value.
-	
+
 	Prototype:
- 
+
 	int pthread_join(pthread_t thread, void **retval);
- 
+
 	thread: The thread ID of the thread to wait for.
- 
+
 	retval: A pointer to store the thread’s return value. If not needed, pass NULL.
- 
+
 	Return Value:
-	
+
 	Returns 0 on success.
- 
+
 	Returns an error code on failure.
- 
+
 	Note: It is important to call pthread_join for non-detached threads to avoid resource leaks.
 
 # how to assign forks for philosopher
@@ -130,3 +130,12 @@ The key insight here is that by alternating the order in which forks are picked 
 
 Conclusion:
 The total number of philosophers and the fork assignment logic both play crucial roles in ensuring that the philosophers can eat without causing a deadlock. The alternating strategy for odd-numbered philosophers is a clever way to prevent resource contention and allow for smooth execution of the dining philosophers' problem.
+
+
+# Testing tools
+
+## Philosopher visualizer
+
+https://nafuka11.github.io/philosophers-visualizer/
+
+

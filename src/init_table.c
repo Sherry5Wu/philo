@@ -1,69 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   init.c                                             :+:      :+:    :+:   */
+/*   init_table.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/04 10:27:21 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/04 10:27:21 by jingwu           ###   ########.fr       */
+/*   Created: 2024/11/20 13:38:56 by jingwu            #+#    #+#             */
+/*   Updated: 2024/11/20 13:38:56 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-
-/*
-	Using (id+1)%(nb_philo) will nicely make a cycle.
-	The logic to assign forks: (consider the left fork is their own fork)
-	-	the odd id philo will first pick the fork on their right, then pick up
-		the fork on the left (their own fork);
-	-	the even id philo will first pick the for on their left(their own fork)
-		then pick the fork on the right.
-*/
-static void	assign_forks(pthread_mutex_t *forks, t_philo *philo)
-{
-	if (philo->id % 2)
-	{
-		philo->l_fork = &forks[(philo->id + 1) % (philo->table->philo_nb)];
-		philo->r_fork = &forks[philo->id];
-	}
-	else
-	{
-		philo->l_fork = &forks[philo->id];
-		philo->r_fork = &forks[(philo->id + 1) % (philo->table->philo_nb)];
-	}
-}
-
-/*
-	pthread_mutex_init() return:
-	0: successfully;
-	others: failed;
-*/
-static t_philo	**init_philos(t_table *table)
-{
-	t_philo			**philos;
-	size_t			i;
-
-	philos = (t_philo **)malloc(sizeof(t_philo *) * (table->philo_nb));
-	if (!philos)
-		return (error_msg_null(MALLOC_ERR));
-	i = 0;
-	while (i < table->philo_nb)
-	{
-		philos[i] = malloc(sizeof(t_philo));
-		if (philos[i])
-			return (error_msg_null(MALLOC_ERR));
-		if (pthread_mutex_init(&philos[i]->philo_lock, 0) != 0)
-			return (error_msg_null(CREATE_MUTEX_ERR));
-		philos[i]->table = table;
-		philos[i]->id = i + 1;
-		philos[i]->meals_eaten = 0;
-		philos[i]->status = THINKING;
-		assign_forks(table->fork_locks, philos[i]);
-		i++;
-	}
-	return (philos);
-}
 
 /*
 	@function
@@ -76,20 +23,24 @@ static t_philo	**init_philos(t_table *table)
 static pthread_mutex_t	*init_forks(t_table *table)
 {
 	pthread_mutex_t	*forks;
-	size_t			i;
+	int				i;
 
 	i = 0;
+	// printf("philo_nb=%zu\n", table->philo_nb);// for testing!!!!!!!!!!!
 	forks = malloc(sizeof(pthread_mutex_t) * table->philo_nb);
 	if (!forks)
 		return (NULL);
-	while (i < table->philo_nb)
+	while (i < (int)table->philo_nb)
 	{
 		if (pthread_mutex_init(&forks[i], 0) != 0)
 		{
+			while (--i >= 0)
+				pthread_mutex_destroy(&forks[i]);
 			ft_free(forks);
 			forks = NULL;
 			return (NULL);
 		}
+		// printf("i=%d\n", i);// for testing!!!!!!!!
 		i++;
 	}
 	return (forks);
@@ -102,15 +53,27 @@ static pthread_mutex_t	*init_forks(t_table *table)
 	true if the initalizations were successful;
 	false if initilization failed;
 */
-static bool	init_global_mutexes(t_table *table)
+static bool	init_mutexes_for_table(t_table *table)
 {
+	int	i;
+
+	i = -1;
 	table->fork_locks = init_forks(table);
 	if (!table->fork_locks)
 		return (false);
 	if (pthread_mutex_init(&(table->sim_stop_lock), 0) != 0)
+	{
+		while (++i < (int)table->philo_nb)
+			pthread_mutex_destroy(&table->fork_locks[i]);
 		return (false);
+	}
 	if (pthread_mutex_init(&(table->write_lock), 0) != 0)
+	{
+		while (++i < (int)table->philo_nb)
+			pthread_mutex_destroy(&table->fork_locks[i]);
+		pthread_mutex_destroy(&table->sim_stop_lock);
 		return (false);
+	}
 	return (true);
 }
 
@@ -133,10 +96,14 @@ bool	init_table(t_table *table, int ac, char **args)
 	table->must_eat_times = -1;
 	if (ac - 1 == 5)
 		table->must_eat_times = (size_t)ft_atoi(args[5]);
-	if (!init_global_mutexes(table))
+	table->start_time = get_time_in_ms();
+	if (!init_mutexes_for_table(table))
 		return (error_msg(INIT_MUTEX_ERR));
 	table->philos = init_philos(table);
 	if (!table->philos)
+	{
+		destroy_mutexes_of_table(table);
 		return (error_msg(INIT_PHILO_ERR));
+	}
 	return (true);
 }

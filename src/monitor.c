@@ -6,7 +6,7 @@
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 13:57:23 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/19 16:41:59 by jingwu           ###   ########.fr       */
+/*   Updated: 2024/11/25 08:22:46 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@
 	1: philosoper is NOT dead;
 	-1: there is an error;
 */
-static int	is_died(t_philo *philo)
+static int	is_dead(t_philo *philo)
 {
 	time_t	last_meal;
 	time_t	current_time;
@@ -55,7 +55,7 @@ static int	is_died(t_philo *philo)
 	True: someone is dead;
 	False: Everyone is alive;
 */
-static bool	is_someone_died(t_table *table)
+static bool	is_someone_dead(t_table *table)
 {
 	size_t	i;
 	int		value;
@@ -63,11 +63,15 @@ static bool	is_someone_died(t_table *table)
 	i = 0;
 	while (i < table->philo_nb)
 	{
-		value = is_died(table->philos[i]);
+		value = is_dead(table->philos[i]);
 		if ( value != 1)
 		{
 			if (value == 0)
+			{
+				// printf("found one dead\n");// for testing!!!!!!!!!!!!1
 				print_philo_status_msg(table->philos[i], DIED);
+			}
+			// printf("in is_someone_dead, going to clean threads\n");// for testing!!!!!!!!!!!!1
 			clean_threads(table, table->philo_nb);
 			return (true);
 		}
@@ -98,9 +102,7 @@ static bool	is_everyone_full(t_table *table)
 
 	i = 0;
 	full_nb = 0;
-	if (table->must_eat_times == -1)
-		return (true);
-	else
+	if (table->must_eat_times != -1)
 	{
 		while (i < table->philo_nb)
 		{
@@ -113,9 +115,8 @@ static bool	is_everyone_full(t_table *table)
 			clean_threads(table, table->philo_nb);
 			return (true);
 		}
-		else
-			return (false);
 	}
+	return (false);
 }
 
 /*
@@ -128,17 +129,19 @@ void	monitor(t_table *table)
 {
 	while (true)
 	{
-		usleep(100);
-		if (is_someone_died(table) == true)
+		usleep(200);
+		if (is_someone_dead(table) == true)
 		{
-			pthread_mutex_lock(&table->sim_stop_lock);
-			table->simulation_stop = true;
-			pthread_mutex_unlock(&table->sim_stop_lock);
+			// pthread_mutex_lock(&table->sim_stop_lock);
+			// // printf("moniter someone is dead\n");//////for testing
+			// table->simulation_stop = true;
+			// pthread_mutex_unlock(&table->sim_stop_lock);
 			break ;
 		}
 		if (is_everyone_full(table) == true)
 		{
 			pthread_mutex_lock(&table->sim_stop_lock);
+			// printf("moniter every is full\n");//////for testing
 			table->simulation_stop = true;
 			pthread_mutex_unlock(&table->sim_stop_lock);
 			break ;
@@ -165,5 +168,6 @@ bool	has_simulation_stopped(t_table *table)
 	if (table->simulation_stop == true)
 		flag = true;
 	pthread_mutex_unlock(&table->sim_stop_lock);
+	// printf("has_simulation_stopped flag=%d\n", flag); //////for testing
 	return (flag);
 }
