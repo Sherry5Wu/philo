@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   init_table.c                                       :+:      :+:    :+:   */
+/*   init.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -36,11 +36,11 @@ static void	assign_forks(pthread_mutex_t *forks, t_philo *philo, size_t i)
 */
 static bool	init_philos(t_table *table)
 {
-	size_t	i;
+	int		i;
 	t_philo	*philo;
 
 	i = 0;
-	while (i < table->philo_nb)
+	while (i < (int)table->philo_nb)
 	{
 		philo = table->philos + i;
 		if (pthread_mutex_init(&philo->philo_lock, NULL) != 0)
@@ -53,7 +53,7 @@ static bool	init_philos(t_table *table)
 		philo->id = i + 1;
 		philo->meals_eaten = 0;
 		philo->action = THINKING;
-		philo->state = READY;
+		philo->state = ALIVE;
 		pthread_mutex_lock(&philo->philo_lock);
 		philo->last_eat = philo->table->start_time;
 		pthread_mutex_unlock(&philo->philo_lock);
@@ -143,7 +143,7 @@ bool	init_table(t_table *table, int ac, char **args)
 		return (error_msg(INIT_MUTEX_ERR));
 	table->philos = malloc(sizeof(t_philo) * (table->philo_nb));
 	if (!table->philos)
-		return (error_msg_null(MALLOC_ERR));
+		return (error_msg(MALLOC_ERR));
 	if (init_philos(table) == false)
 	{
 		destroy_mutexes_of_table(table);

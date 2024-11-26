@@ -6,7 +6,7 @@
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/19 08:54:24 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/25 12:41:23 by jingwu           ###   ########.fr       */
+/*   Updated: 2024/11/26 14:26:24 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ static bool	update_philo_action(t_philo *philo, t_action action)
 			return (error_msg(GET_TIME_ERR));
 	}
 	pthread_mutex_unlock(&(philo->philo_lock));
+
 	print_philo_action_msg(philo, action);
 	return (true);
 }
@@ -72,6 +73,8 @@ static bool	update_philo_action(t_philo *philo, t_action action)
 bool	philo_eating_sleeping(t_philo *philo)
 {
 	if (pick_up_forks(philo) == false)
+		return (false);
+	if (get_philo_state(philo) == OVER)
 		return (false);
 	if (update_philo_action(philo, EATING) == false)
 		return (false);
@@ -81,6 +84,8 @@ bool	philo_eating_sleeping(t_philo *philo)
 	pthread_mutex_lock(&philo->philo_lock);
 	philo->meals_eaten++;
 	pthread_mutex_unlock(&philo->philo_lock);
+	if (get_philo_state(philo) == OVER)
+		return (false);
 	if (update_philo_action(philo, SLEEPING) == false)
 		return (false);
 	if (thread_sleep(philo, philo->table->time_to_sleep) == false)
@@ -90,6 +95,8 @@ bool	philo_eating_sleeping(t_philo *philo)
 
 bool	philo_thinking(t_philo *philo)
 {
+	if (get_philo_state(philo) == OVER)
+		return (false);
 	if (update_philo_action(philo, THINKING) == false)
 		return (false);
 	return (true);

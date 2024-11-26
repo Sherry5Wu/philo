@@ -132,10 +132,55 @@ Conclusion:
 The total number of philosophers and the fork assignment logic both play crucial roles in ensuring that the philosophers can eat without causing a deadlock. The alternating strategy for odd-numbered philosophers is a clever way to prevent resource contention and allow for smooth execution of the dining philosophers' problem.
 
 
-# Testing tools
+# Testing
 
 ## Philosopher visualizer
 
 https://nafuka11.github.io/philosophers-visualizer/
 
+## Flags
+
+```
+valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./philo
+
+valgrind --tool=helgrind ./philo
+
+```
+
+## Test cases
+
+yes_die cases:
+```
+./philo 4 410 205 200
+
+./philo 5 520 300 200 5
+
+./philo 1 200 100 80
+
+```
+no_die caese:
+```
+./philo 5 1000 300 200
+
+./philo 8 1000 300 200 6
+```
+
+Input_checking cases: the program should give an error message and no crash
+```
+./philo 0 200 100 100
+
+./philo 2 0 100 100 100
+
+./philo 4 200 0 100 100
+
+./philo 5 300 100 0
+
+./philo 5 300 100 100 0
+
+./philo 5 -1 100 100
+
+./philo 5 100 200
+
+./philo 5 200 50 50 6 5
+```
 
