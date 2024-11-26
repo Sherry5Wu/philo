@@ -6,7 +6,7 @@
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/18 13:53:39 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/25 08:38:40 by jingwu           ###   ########.fr       */
+/*   Updated: 2024/11/26 08:06:39 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,23 +14,12 @@
 
 void	free_table(t_table *table)
 {
-	size_t	i;
-
 	if (!table)
 		return ;
 	if (table->fork_locks)
 		ft_free(table->fork_locks);
 	if (table->philos)
-	{
-		i = 0;
-		while (i < table->philo_nb)
-		{
-			if (table->philos[i])
-				ft_free(table->philos[i]);
-			i++;
-		}
 		ft_free(table->philos);
-	}
 }
 
 /*
@@ -44,16 +33,15 @@ void	clean_threads(t_table *table, size_t thread_nb)
 	size_t	i;
 
 	i = 0;
-	// printf("thread_nb=%zu\n", thread_nb);//for testing
 	while (i < thread_nb)
 	{
-		set_philo_status(table->philos[i], DIED);
+		update_philo_state(&table->philos[i], OVER);
 		i++;
 	}
+	i = 0;
 	while (i < thread_nb)
 	{
-		// printf("i=%zu\n", i);//for testing
-		if (pthread_join(table->philos[i]->thread, NULL) != 0)
+		if (pthread_join(table->philos[i].thread, NULL) != 0)
 		{
 			pthread_mutex_lock(&table->write_lock);
 			error_msg(FAIL_JOIN_THR);
@@ -62,6 +50,7 @@ void	clean_threads(t_table *table, size_t thread_nb)
 		i++;
 	}
 }
+
 /*
 	@function
 	Destroy all the mutexes which belong to the table.
@@ -79,9 +68,9 @@ void	destroy_mutexes_of_table(t_table *table)
 		pthread_mutex_destroy(&table->fork_locks[i]);
 		i++;
 	}
-	pthread_mutex_destroy(&table->sim_stop_lock);
 	pthread_mutex_destroy(&table->write_lock);
 }
+
 /*
 	@function
 	Destroy all the mutexes of the whole process.
@@ -98,10 +87,9 @@ static void	destroy_all_mutexes(t_table *table)
 	while (i < table->philo_nb)
 	{
 		pthread_mutex_destroy(&table->fork_locks[i]);
-		pthread_mutex_destroy(&table->philos[i]->philo_lock);
+		pthread_mutex_destroy(&table->philos[i].philo_lock);
 		i++;
 	}
-	pthread_mutex_destroy(&table->sim_stop_lock);
 	pthread_mutex_destroy(&table->write_lock);
 }
 

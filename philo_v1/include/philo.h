@@ -23,13 +23,13 @@
 /*-----------------------------Define Error Messages------------------------*/
 # define TOO_LESS		"Too less argments. Should pass at least 5 arguments"
 # define TOO_MANY		"Too many arguments. Can pass 6 arguments at most."
-# define NON_NUM_ARG	"Non-number characters.All the arguments should \
-just contain numbers."
-# define PHILO_NUM_ERR	"Invalid philosopher number."
-# define TIME_DIE_ERR	"Invalid time to die."
-# define TIME_EAT_ERR	"Invalid time to eat."
-# define TIME_SLEEP_ERR	"Invalid time to sleep."
-# define MUST_EST_ERR	"Invalid number of times each philosopher must eat"
+# define NON_NUM_ARG	"Invaild characters.All the arguments should just \
+contain numbers."
+# define PHILO_NUM_ERR	"Philosopher number can't be equal or smaller than 0."
+# define TIME_DIE_ERR	"Time to die can't be equal or smaller than 0."
+# define TIME_EAT_ERR	"Time to eat can't be equal or smaller than 0.."
+# define TIME_SLEEP_ERR	"Time to sleep can't be equal or smaller than 0."
+# define MUST_EST_ERR	"Must eat times can't be equal or smaller than 0."
 # define MALLOC_ERR		"error: Could not allocate memory."
 # define CREATE_MUTEX_ERR	"error: Could not create mutex."
 # define CREATE_THREAD_ERR	"error: Could not create thread."
@@ -41,15 +41,21 @@ just contain numbers."
 /*----------------------------------Structs--------------------------------*/
 typedef struct s_table	t_table;
 
-typedef enum e_status
+typedef enum e_action
 {
 	THINKING = 0,
 	EATING = 1,
 	SLEEPING = 2,
 	GOT_LEFT_FORK = 3,
 	GOT_RIGHT_FORK = 4,
-	DIED = 5,
-}	t_status;
+	DIED,
+}	t_action;
+
+typedef enum e_state
+{
+	ALIVE = 0,
+	OVER,
+}	t_state;
 
 typedef struct s_philo
 {
@@ -61,7 +67,8 @@ typedef struct s_philo
 	pthread_mutex_t	*l_fork;
 	pthread_mutex_t	*r_fork;
 	t_table			*table;
-	t_status		status;
+	t_state			state;
+	t_action		action;
 }	t_philo;
 
 typedef struct s_table
@@ -72,17 +79,12 @@ typedef struct s_table
 	size_t			time_to_eat;
 	size_t			time_to_sleep;
 	int				must_eat_times;
-	bool			simulation_stop;
-	pthread_mutex_t	sim_stop_lock;
 	pthread_mutex_t	write_lock;
 	pthread_mutex_t	*fork_locks;
-	t_philo			**philos;
+	t_philo			*philos;
 }	t_table;
 
 /*----------------------------------Functions-------------------------------*/
-// init_philo.c
-t_philo	**init_philos(t_table *table);
-
 // init_table.c
 bool	init_table(t_table *table, int ac, char **args);
 
@@ -92,7 +94,6 @@ void	putstr_fd(char	*message, int fd);
 int		ft_atoi(const char *str);
 
 // monitor.c
-bool	has_simulation_stopped(t_table *table);
 void	monitor(t_table *table);
 
 //routine_actions.c
@@ -103,7 +104,8 @@ bool	philo_thinking(t_philo *philo);
 // routine.c
 void	*routine(void *data);
 bool	thread_sleep(t_philo *philo, size_t duration);
-void	set_philo_status(t_philo *philo, int status);
+void	update_philo_state(t_philo *philo, int state);
+int		get_philo_state(t_philo *philo);
 void	put_down_forks(t_philo *philo);
 
 // stop_simulation.c
@@ -117,6 +119,6 @@ time_t	get_time_in_ms(void);
 void	ft_free(void *str);
 bool	error_msg(char	*message);
 void	*error_msg_null(char *message);
-void	print_philo_status_msg(t_philo *philo, t_status status);
+void	print_philo_action_msg(t_philo *philo, t_action action);
 
 #endif

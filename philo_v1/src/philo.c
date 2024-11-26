@@ -25,7 +25,7 @@ static bool	are_valid_numbers(char **args)
 		{
 			if (args[i][j] < 48 || args[i][j] > 57)
 			{
-				if(args[i][j] != '-' && args[i][j] != '+')
+				if (args[i][j] != '-' && args[i][j] != '+')
 					return (false);
 				else
 				{
@@ -49,11 +49,11 @@ static bool	check_range(char **args)
 {
 	if (ft_atoi(args[1]) <= 0)
 		return (error_msg(PHILO_NUM_ERR));
-	if (ft_atoi(args[2]) < 0)
+	if (ft_atoi(args[2]) <= 0)
 		return (error_msg(TIME_DIE_ERR));
 	if (ft_atoi(args[3]) <= 0)
 		return (error_msg(TIME_EAT_ERR));
-	if (ft_atoi(args[4]) < 0)
+	if (ft_atoi(args[4]) <= 0)
 		return (error_msg(TIME_SLEEP_ERR));
 	if (args[5] && ft_atoi(args[5]) <= 0)
 		return (error_msg(MUST_EST_ERR));
@@ -94,8 +94,8 @@ static bool	start_simulation(t_table *table)
 	i = 0;
 	while (i < table->philo_nb)
 	{
-		if (pthread_create(&table->philos[i]->thread, NULL,
-			&routine, table->philos[i]) != 0)
+		if (pthread_create(&table->philos[i].thread, NULL,
+				&routine, &table->philos[i]) != 0)
 		{
 			clean_threads(table, i);
 			return (error_msg(CREATE_THREAD_ERR));
@@ -106,24 +106,13 @@ static bool	start_simulation(t_table *table)
 	return (true);
 }
 
-// void print_table(t_table table)
-// {
-// 	printf("nb=%zu\n",table.philo_nb);
-// 	printf("time_die=%zu\n",table.time_to_die);
-// 	printf("time_eat=%zu\n",table.time_to_eat);
-// 	printf("time_sleep=%zu\n",table.time_to_sleep);
-// 	printf("must_eat=%d\n",table.must_eat_times);
-// 	printf("simulation_stop=%d\n",table.simulation_stop);
-// }
-
-
 int	main(int ac, char **av)
 {
 	t_table	table;
 
 	if (ac == 5 || ac == 6)
 	{
-		if(validate_args(av) == false)
+		if (validate_args(av) == false)
 			return (EXIT_FAILURE);
 		if (init_table(&table, ac, av) == false)
 		{
@@ -131,7 +120,7 @@ int	main(int ac, char **av)
 			return (EXIT_FAILURE);
 		}
 		if (start_simulation(&table) == false)
-			return(stop_simulation(&table));
+			return (stop_simulation(&table));
 		stop_simulation(&table);
 		return (EXIT_SUCCESS);
 	}
@@ -141,5 +130,3 @@ int	main(int ac, char **av)
 		putstr_fd(TOO_MANY, 2);
 	return (EXIT_FAILURE);
 }
-// valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --tool=helgrind ./philo
-

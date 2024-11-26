@@ -6,7 +6,7 @@
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/19 08:54:24 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/25 09:54:58 by jingwu           ###   ########.fr       */
+/*   Updated: 2024/11/25 12:41:23 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,23 +25,25 @@
 */
 static bool	pick_up_forks(t_philo *philo)
 {
-	// static int i = 1;
-
 	pthread_mutex_lock(philo->l_fork);
-	// printf("<-----i=%d>\n", i++);
-	if (has_simulation_stopped(philo->table) == true)
+	if (get_philo_state(philo) == OVER)
 	{
 		pthread_mutex_unlock(philo->l_fork);
 		return (false);
 	}
-	print_philo_status_msg(philo, GOT_LEFT_FORK);
+	print_philo_action_msg(philo, GOT_LEFT_FORK);
+	if (philo->table->philo_nb == 1)
+	{
+		pthread_mutex_unlock(philo->l_fork);
+		return (false);
+	}
 	pthread_mutex_lock(philo->r_fork);
-	if (has_simulation_stopped(philo->table) == true)
+	if (get_philo_state(philo) == OVER)
 	{
 		put_down_forks(philo);
 		return (false);
 	}
-	print_philo_status_msg(philo, GOT_LEFT_FORK);
+	print_philo_action_msg(philo, GOT_RIGHT_FORK);
 	return (true);
 }
 
@@ -52,27 +54,26 @@ static bool	pick_up_forks(t_philo *philo)
 	If update the status to EATING, then need to update last_eat time to
 	the current time.
 */
-static bool	update_philo_status(t_philo *philo, t_status status)
+static bool	update_philo_action(t_philo *philo, t_action action)
 {
 	pthread_mutex_lock(&(philo->philo_lock));
-	philo->status = status;
-	if (status == EATING)
+	philo->action = action;
+	if (philo->action == EATING)
 	{
 		philo->last_eat = get_time_in_ms();
 		if (philo->last_eat == -1)
 			return (error_msg(GET_TIME_ERR));
 	}
 	pthread_mutex_unlock(&(philo->philo_lock));
-	print_philo_status_msg(philo, status);
+	print_philo_action_msg(philo, action);
 	return (true);
 }
 
 bool	philo_eating_sleeping(t_philo *philo)
 {
-
 	if (pick_up_forks(philo) == false)
 		return (false);
-	if (update_philo_status(philo, EATING) == false)
+	if (update_philo_action(philo, EATING) == false)
 		return (false);
 	if (thread_sleep(philo, philo->table->time_to_eat) == false)
 		return (false);
@@ -80,9 +81,8 @@ bool	philo_eating_sleeping(t_philo *philo)
 	pthread_mutex_lock(&philo->philo_lock);
 	philo->meals_eaten++;
 	pthread_mutex_unlock(&philo->philo_lock);
-	// if (update_philo_status(philo, SLEEPING) == false)
-	// 	return (false);
-	print_philo_status_msg(philo, SLEEPING);
+	if (update_philo_action(philo, SLEEPING) == false)
+		return (false);
 	if (thread_sleep(philo, philo->table->time_to_sleep) == false)
 		return (false);
 	return (true);
@@ -90,8 +90,7 @@ bool	philo_eating_sleeping(t_philo *philo)
 
 bool	philo_thinking(t_philo *philo)
 {
-	// if (update_philo_status(philo, THINKING) == false)
-	// 	return (false);
-	print_philo_status_msg(philo, THINKING);
+	if (update_philo_action(philo, THINKING) == false)
+		return (false);
 	return (true);
 }

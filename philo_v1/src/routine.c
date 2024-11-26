@@ -6,7 +6,7 @@
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 10:27:04 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/25 09:53:29 by jingwu           ###   ########.fr       */
+/*   Updated: 2024/11/25 14:09:22 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,16 +16,25 @@
 	@function
 	Set philosopher's status to certain value. Don't need print message out.
 */
-void	set_philo_status(t_philo *philo, int status)
+void	update_philo_state(t_philo *philo, int state)
 {
 	pthread_mutex_lock(&philo->philo_lock);
-	philo->status = status;
+	philo->state = state;
 	pthread_mutex_unlock(&philo->philo_lock);
+}
+
+int	get_philo_state(t_philo *philo)
+{
+	int	state;
+
+	pthread_mutex_lock(&philo->philo_lock);
+	state = philo->state;
+	pthread_mutex_unlock(&philo->philo_lock);
+	return (state);
 }
 
 void	put_down_forks(t_philo *philo)
 {
-	// printf("Inside put_down_forks\nID=%zu\ntime=%zu\n", philo->id, get_time_in_ms() - philo->table->start_time);
 	pthread_mutex_unlock(philo->l_fork);
 	pthread_mutex_unlock(philo->r_fork);
 }
@@ -50,35 +59,22 @@ bool	thread_sleep(t_philo *philo, size_t duration)
 	if (current_time == -1)
 		return (error_msg(GET_TIME_ERR));
 	continue_time = current_time + duration;
-	while ( current_time < continue_time)
+	while (current_time < continue_time)
 	{
-		usleep (1000);
-		if (has_simulation_stopped(philo->table) == true)
+		usleep (100);
+		if (get_philo_state(philo) == OVER)
 		{
-			if (philo->status == EATING)
+			pthread_mutex_lock(&philo->philo_lock);
+			if (philo->action == EATING)
 				put_down_forks(philo);
+			pthread_mutex_unlock(&philo->philo_lock);
 			return (false);
 		}
 		current_time = get_time_in_ms();
+		if (current_time == -1)
+			return (error_msg(GET_TIME_ERR));
 	}
 	return (true);
-}
-
-static void	*one_philo_routine(t_philo *philo)
-{
-	pthread_mutex_lock(philo->l_fork);
-	print_philo_status_msg(philo, GOT_LEFT_FORK);
-	printf("----------------------------4--->\n");// for testing!!!!!!!!!!!!!
-	if (thread_sleep(philo, philo->table->time_to_die) == false)
-	{
-		pthread_mutex_unlock(philo->l_fork);
-		return (NULL);
-	}
-	print_philo_status_msg(philo, DIED);
-	usleep(philo->table->time_to_die * 1000);
-	pthread_mutex_unlock(philo->l_fork);
-	printf("leaving one_philo_routine\n");// for testing!!!!!!!!!!!!!
-	return (NULL);
 }
 
 /*
@@ -99,16 +95,14 @@ void	*routine(void *data)
 	t_philo	*philo;
 
 	philo = (t_philo *)data;
-	if (philo->table->philo_nb == 1)
-		return (one_philo_routine(philo));
-	if (philo->id % 2 != 0)
+	if (philo->table->philo_nb != 1 && philo->id % 2 != 0)
 	{
 		if (philo_thinking(philo) == false)
 			return (NULL);
 		if (thread_sleep(philo, philo->table->time_to_eat / 2) == false)
 			return (NULL);
 	}
-	while (has_simulation_stopped(philo->table) == false)
+	while (get_philo_state(philo) != OVER)
 	{
 		if (philo_eating_sleeping(philo) == false)
 			break ;

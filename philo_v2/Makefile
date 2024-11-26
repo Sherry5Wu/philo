@@ -1,6 +1,5 @@
 NAME = philo
 CC := cc
-# -fsanitize=address,thread,undefined for testing only
 CFLAG := -Wall -Wextra -Werror -g -pthread
 HEADER = ./include
 
@@ -8,7 +7,7 @@ GREEN := \033[1;92m
 DEFAULT := \033[0;39m
 
 SRCS_DIR = ./src
-SRC = init_philos.c init_table.c libft.c monitor.c philo.c routine_actions.c \
+SRC = init_table.c libft.c monitor.c philo.c routine_actions.c \
 		routine.c stop_simulation.c utils.c
 SRCS = $(addprefix $(SRCS_DIR)/, $(SRC))
 

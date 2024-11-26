@@ -97,23 +97,21 @@ void	*error_msg_null(char *message)
 	@function
 	To output the each status message of a philosopher.
 */
-void	print_philo_status_msg(t_philo *philo, t_status status)
+void	print_philo_action_msg(t_philo *philo, t_action action)
 {
 	time_t	time;
 
-	if (has_simulation_stopped(philo->table) == true)
-		return ;
 	pthread_mutex_lock(&philo->table->write_lock);
 	time = get_time_in_ms() - philo->table->start_time;
-	if (status == DIED)
+	if (action == DIED)
 		printf("%ld %zu %s\n", time, philo->id, "died");
-	else if (status == EATING)
+	else if (action == EATING)
 		printf("%ld %zu %s\n", time, philo->id, "is eating");
-	else if (status == THINKING)
+	else if (action == THINKING)
 		printf("%ld %zu %s\n", time, philo->id, "is thinking");
-	else if (status == SLEEPING)
+	else if (action == SLEEPING)
 		printf("%ld %zu %s\n", time, philo->id, "is sleeping");
-	else if (status == GOT_LEFT_FORK || status == GOT_RIGHT_FORK)
+	else if (action == GOT_LEFT_FORK || action == GOT_RIGHT_FORK)
 		printf("%ld %zu %s\n", time, philo->id, "has taken a fork");
 	pthread_mutex_unlock(&philo->table->write_lock);
 }
