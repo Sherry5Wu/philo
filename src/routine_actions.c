@@ -6,7 +6,7 @@
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/19 08:54:24 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/26 14:26:24 by jingwu           ###   ########.fr       */
+/*   Updated: 2024/11/28 14:47:37 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,6 @@ static bool	update_philo_action(t_philo *philo, t_action action)
 			return (error_msg(GET_TIME_ERR));
 	}
 	pthread_mutex_unlock(&(philo->philo_lock));
-
 	print_philo_action_msg(philo, action);
 	return (true);
 }
