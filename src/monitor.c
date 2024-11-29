@@ -6,7 +6,7 @@
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 13:57:23 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/26 09:45:16 by jingwu           ###   ########.fr       */
+/*   Updated: 2024/11/29 09:44:39 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,8 +102,10 @@ static bool	is_everyone_full(t_table *table)
 	{
 		while (i < table->philo_nb)
 		{
+			pthread_mutex_lock(&table->philos[i].philo_lock);
 			if (table->philos[i].meals_eaten >= (size_t)table->must_eat_times)
 				full_nb++;
+			pthread_mutex_unlock(&table->philos[i].philo_lock);
 			i++;
 		}
 		if (full_nb == table->philo_nb)

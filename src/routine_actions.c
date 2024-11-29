@@ -6,7 +6,7 @@
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/19 08:54:24 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/28 14:47:37 by jingwu           ###   ########.fr       */
+/*   Updated: 2024/11/29 10:15:53 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,10 @@ bool	philo_eating_sleeping(t_philo *philo)
 	if (pick_up_forks(philo) == false)
 		return (false);
 	if (get_philo_state(philo) == OVER)
+	{
+		put_down_forks(philo);
 		return (false);
+	}
 	if (update_philo_action(philo, EATING) == false)
 		return (false);
 	if (thread_sleep(philo, philo->table->time_to_eat) == false)
@@ -85,8 +88,7 @@ bool	philo_eating_sleeping(t_philo *philo)
 	pthread_mutex_unlock(&philo->philo_lock);
 	if (get_philo_state(philo) == OVER)
 		return (false);
-	if (update_philo_action(philo, SLEEPING) == false)
-		return (false);
+	update_philo_action(philo, SLEEPING);
 	if (thread_sleep(philo, philo->table->time_to_sleep) == false)
 		return (false);
 	return (true);
@@ -96,7 +98,6 @@ bool	philo_thinking(t_philo *philo)
 {
 	if (get_philo_state(philo) == OVER)
 		return (false);
-	if (update_philo_action(philo, THINKING) == false)
-		return (false);
+	update_philo_action(philo, THINKING);
 	return (true);
 }
