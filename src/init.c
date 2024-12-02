@@ -79,7 +79,7 @@ static pthread_mutex_t	*init_forks(t_table *table)
 	i = 0;
 	forks = malloc(sizeof(pthread_mutex_t) * table->philo_nb);
 	if (!forks)
-		return (NULL);
+		return (error_msg_null(MALLOC_ERR));
 	while (i < (int)table->philo_nb)
 	{
 		if (pthread_mutex_init(&forks[i], 0) != 0)
@@ -139,7 +139,8 @@ bool	init_table(t_table *table, int ac, char **args)
 	if (ac - 1 == 5)
 		table->must_eat_times = (size_t)ft_atoi(args[5]);
 	table->start_time = get_time_in_ms();
-	if (!init_mutexes_for_table(table))
+	table->philos = NULL;
+	if (init_mutexes_for_table(table) == false)
 		return (error_msg(INIT_MUTEX_ERR));
 	table->philos = malloc(sizeof(t_philo) * (table->philo_nb));
 	if (!table->philos)
