@@ -1,5 +1,13 @@
 # philo
 
+This project aims to teach concurrent programming, focusing on multithreading and multiprocessing. Learning the concept of thread, mutex, and how to use them.
+
+## Table of Contents
+
+1. [Functions](#functions)
+2. [Assign forks for philosopher](#Assign-forks-for-philosopher)
+3. [Testig](#Testing)
+
 # functions
 
 ## thread
@@ -79,10 +87,28 @@
 
 	Note: It is important to call pthread_join for non-detached threads to avoid resource leaks.
 
-# how to assign forks for philosopher
+# Assign-forks-for-philosopher
+
+## Solution 1
+
+This is a simple way to assign forks to philosopher. Except the first one, for others, the left fork is their own, the right fork belongs to the philospher sitting on the right side.
+
+```
+static void	assign_forks(pthread_mutex_t *forks, t_philo *philo, size_t i)
+{
+	philo->l_fork = &forks[i];
+	if (i == 0)
+		philo->r_fork = &forks[philo->table->philo_nb - 1];
+	else
+		philo->r_fork = &forks[i - 1];
+}
+```
+
+## Solution 2
 
 The fork assignment logic in the classic philosophers problem is designed to ensure that each philosopher can safely pick up the necessary two forks without causing deadlocks. Here's a breakdown of the logic used in the function you provided:
 
+```
 static void	assign_forks(t_philo *philo)
 {
 	philo->fork[0] = philo->id;
@@ -93,6 +119,7 @@ static void	assign_forks(t_philo *philo)
 		philo->fork[1] = philo->id;
 	}
 }
+```
 
 Key Concepts:
 philo->id: The unique ID of each philosopher.
@@ -141,11 +168,36 @@ https://nafuka11.github.io/philosophers-visualizer/
 ## Flags
 
 ```
+// testing for memory leaks
+
 valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./philo
 
-valgrind --tool=helgrind ./philo
+// testing the data races
+
+valgrind --tool=helgrind --tool=drd ./philo
 
 ```
+
+A trick to testing  memory leak when allocating memory failed. For example, in my code I allocate memory  for forks in init.c function init_forks,
+
+```
+forks = malloc(sizeof(pthread_mutex_t) * table->philo_nb);
+if (!forks)
+	return (error_msg_null(MALLOC_ERR));
+
+```
+then you can change the code to:
+
+```
+forks = malloc(sizeof(pthread_mutex_t) * table->philo_nb);
+free(forks);
+forks = NULL
+if (!forks)
+return (error_msg_null(MALLOC_ERR));
+
+```
+then when allocated memory failed, if there is any leak in the code.
+
 
 ## Test cases
 
