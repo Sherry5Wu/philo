@@ -21,7 +21,7 @@
 # include <sys/time.h>
 
 /*-----------------------------Define Error Messages------------------------*/
-# define TOO_LESS		"Too less argments. Should pass at least 5 arguments"
+# define TOO_LESS		"Too less arguments. Should pass at least 5 arguments"
 # define TOO_MANY		"Too many arguments. Can pass 6 arguments at most."
 # define NON_NUM_ARG	"Invaild characters.All the arguments should just \
 contain numbers."

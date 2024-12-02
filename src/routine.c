@@ -6,7 +6,7 @@
 /*   By: jingwu <jingwu@student.hive.fi>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/04 10:27:04 by jingwu            #+#    #+#             */
-/*   Updated: 2024/11/25 14:09:22 by jingwu           ###   ########.fr       */
+/*   Updated: 2024/12/02 09:27:52 by jingwu           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,18 +89,24 @@ bool	thread_sleep(t_philo *philo, size_t duration)
 	For avoiding fork racing, when there is more than one philosopher,
 	the philosophers with odd IDs will do think_routine first;
 	the philosophers with even IDs will start eat first.
+	
+	@what is "__thread"?
+	Use the __thread or thread_local keyword to ensure that error_code is unique to
+	each thread or properly synchronized if shared.
 */
 void	*routine(void *data)
 {
-	t_philo	*philo;
+	t_philo				*philo;
+	static __thread int	error_code;
 
 	philo = (t_philo *)data;
+	error_code = -1;
 	if (philo->table->philo_nb != 1 && philo->id % 2 != 0)
 	{
-		if (philo_thinking(philo) == false)
-			return (NULL);
+		if (philo_thinking(philo)== false)
+			return (&error_code);
 		if (thread_sleep(philo, philo->table->time_to_eat / 2) == false)
-			return (NULL);
+			return (&error_code);
 	}
 	while (get_philo_state(philo) != OVER)
 	{
