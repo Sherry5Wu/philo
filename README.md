@@ -33,7 +33,6 @@ This project aims to teach concurrent programming, focusing on multithreading an
 	Returns an error code on failure.
 
 	Example:
- 	```
 
 		#include <pthread.h>
 		#include <stdio.h>
@@ -49,7 +48,6 @@ This project aims to teach concurrent programming, focusing on multithreading an
 		    pthread_join(thread, NULL);  // 等待线程结束
 		    return 0;
 		}
-	```
  
 	2. pthread_detach
 	Purpose: Sets the thread to a detached state. Detached threads automatically release their resources
