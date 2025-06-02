@@ -4,13 +4,30 @@ This project aims to teach concurrent programming, focusing on multithreading an
 
 ## Table of Contents
 
-1. [Functions](#functions)
-2. [Assign forks for philosopher](#Assign-forks-for-philosopher)
-3. [Testig](#Testing)
+1. [How to Run](#how-to-run)
+2. [Functions](#functions)
+3. [Assign forks for philosopher](#assign-forks-for-philosopher)
+4. [Testig](#testing)
 
-# functions
+## How to Run?
+### Step 1: Clone the project
+```bash
+git clone https://github.com/Sherry5Wu/philo.git philo && cd philo
+```
+### Step 2: make
+```bash
+make
+```
+It will generate a "philo".
+### Step 3: Start to use
+```bash
+./philo 2 500 200 200 2
+```
+The program will stop when every philosopher eats 2 times.
 
-## thread
+## functions
+
+### thread
 
 	1. pthread_create
 	Purpose: Creates a new thread and specifies the function that the thread will execute.
@@ -48,7 +65,7 @@ This project aims to teach concurrent programming, focusing on multithreading an
 		    pthread_join(thread, NULL);  // 等待线程结束
 		    return 0;
 		}
- 
+
 	2. pthread_detach
 	Purpose: Sets the thread to a detached state. Detached threads automatically release their resources
 
@@ -87,9 +104,9 @@ This project aims to teach concurrent programming, focusing on multithreading an
 
 	Note: It is important to call pthread_join for non-detached threads to avoid resource leaks.
 
-# Assign-forks-for-philosopher
+## Assign-forks-for-philosopher
 
-## Solution 1
+### Solution 1
 
 This is a simple way to assign forks to philosopher. Except the first one, for others, the left fork is their own, the right fork belongs to the philospher sitting on the right side.
 
@@ -104,7 +121,7 @@ static void	assign_forks(pthread_mutex_t *forks, t_philo *philo, size_t i)
 }
 ```
 
-## Solution 2
+### Solution 2
 
 The fork assignment logic in the classic philosophers problem is designed to ensure that each philosopher can safely pick up the necessary two forks without causing deadlocks. Here's a breakdown of the logic used in the function you provided:
 
@@ -159,13 +176,13 @@ Conclusion:
 The total number of philosophers and the fork assignment logic both play crucial roles in ensuring that the philosophers can eat without causing a deadlock. The alternating strategy for odd-numbered philosophers is a clever way to prevent resource contention and allow for smooth execution of the dining philosophers' problem.
 
 
-# Testing
+## Testing
 
-## Philosopher visualizer
+### Philosopher visualizer
 
 https://nafuka11.github.io/philosophers-visualizer/
 
-## Flags
+### Flags
 
 ```
 // testing for memory leaks
@@ -199,7 +216,7 @@ return (error_msg_null(MALLOC_ERR));
 then when allocated memory failed, if there is any leak in the code.
 
 
-## Test cases
+### Test cases
 
 yes_die cases:
 ```
