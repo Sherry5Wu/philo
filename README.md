@@ -24,7 +24,8 @@ It will generate a "philo".
 ./philo 2 500 200 200 2
 ```
 The program will stop when every philosopher eats 2 times.
-![philo](https://github.com/user-attachments/assets/889c3ded-3cba-4520-b705-1b266b2f69ba)
+![philo](https://github.com/user-attachments/assets/36cd4064-12c0-4245-97a2-063fece46aa5)
+
 
 ## functions
 
